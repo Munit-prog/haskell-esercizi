@@ -1,0 +1,107 @@
+--raddoppio
+doppio :: Int->Int
+doppio x=x*2
+--Int -> Int si legge "funzione che prende un Int e restituisce un int"
+--somma
+somma :: Int->Int->Int
+somma x y =x+y
+--fattoriale (caso base + passo ricorsivo)
+fattoriale :: Integer -> Integer
+fattoriale 0=1
+fattoriale n = n * fattoriale (n-1)
+-- Integer (interi a precisione arbitraria) invece di Int (dimensione fissa)
+--Fibonacci
+fib::Integer->Integer
+fib 0 = 0
+fib 1= 1
+fib n = fib (n-1) + fib (n-2)
+--ricorsione sulle liste elemento posto in testa al resto x:xs, dove : operatore cons)
+sommaLista :: [Integer] -> Integer
+sommaLista []  = 0
+sommaLista (x:xs) = x + sommaLista xs
+--si legge: somma vuota=0, somma di una lista con testa x e coda xs è x più la somma di xs, fa
+--x + ricorsione xs, quindi si somma x più il resto
+--lunghezza lista
+lunghezza :: [a] -> integer   --a minuscola: tipo polimorfo, funziona per liste di ogni tipo
+lunghezza [] = 0
+lunghezza (_:xs) =1 + lunghezza xs
+-- massimo di una lista
+massimo :: [Integer]-> Integer
+massimo[x]=x
+massimo (x.xs) = max x (massimo xs)
+--funzioni come valori 
+applicaDueVolte :: (a->a) -> a -> a
+applicaDueVolte f x = f (f x)
+--(a->a)->a->a dice: prendo una funzione f (da a ad a) e un valore x, e restituisco f(f x)
+-- parentesi attorno ad (a->a) indicano che è una funzione
+-- funzione anonima \x -> corspo, usa-e-getta
+--map applica una funzione a ogni elemento della lista
+map :: (a->b)->[a]->[b]
+map _ [] = []
+map f (x:xs) = f x : map f xs
+--filter trattiene elementi che soddisfano un predicato (restituisce Bool)
+filter :: (a->Bool)->[a]->[a]
+filter _ [] = []
+filter p (x:xs)
+| p x    = x : filter p xs
+| otherwise = filter p xs
+--[1,2,3] non è altro che 1 : (2 : (3 : []))
+--foldr f z: sostituisce ogni : con f e il [] finale con z
+foldr :: (a->b->b) -> b -> [a] -> b
+foldr _ z []   = z
+foldr f z (x:xs)  =  f x (foldr f z xs)
+-- composizione funzioni (f . g) x significa f (g x)
+(.) :: (b->c) -> (a->b) -> a -> c
+
+-- somma solo numeri pari
+sommaPari :: [Integer] -> Integer
+sommaPari = sum . filter even
+-- si legge da destra a sinistra
+-- quadrati di tutti gli elementi
+quadrati :: [Integer] -> [Integer]
+quadrati xs = map (^2) xs
+-- somma quadrati pari
+sommaQuadratiPari :: [Integer] -> Integer
+sommaQuadratiPari = sum . filter even . map (^2)
+-- foldr1 prende due argomenti: niente valore iniziale. Al suo posto, usa l'ultimo elemento della
+-- lista come caso base, caso base è con un elemento mai []
+foldr1 _ [x] = x
+foldr1 f (x:xs) = f x (foldr1 f xs)
+-- tipi dato algebrici, data: nascono il tipo somma(scelta tra alternativa) e prodotto(aggregazione)
+data Forma = Cerchio Double
+           | Rettangolo Double Double
+deriving Show
+--Forma o è un cerchio o un rettangolo
+area :: Forma -> Double
+area (Cerchio r)       = p1 * r^2
+area (Rettangolo b h) = b*h
+-- calcola le aree di ogni tipo di Forma, avvisa se dimentichi casi
+--un tipo può avere un parametro
+data Maybe a = Nothing | Just a
+--Un Maybe a è o Nothing (valore assente) o Just x (un valore x presente), 
+-- risultato potrebbe non esistere
+--massimo totale
+massimoSicuro :: [Integer] -> Maybe Integer
+massimoSicuro [] = Nothing
+massimoSicuro xs = Just (foldrl max xs)
+--massimo con lista vuota, descrizione:
+descriviMax :: [Integer] -> String
+descriviMax xs = case massimoSicuro xs of
+  Nothing -> "lista vuota"
+  Just m -> "il massimo è " ++ show m
+-- albero binario, tipo riferirsi a sè stesso
+data Albero a = Foglia
+              | Nodo (Albero a) a (Albero a)
+   deriving Show
+--un nodo contiene sottoalbero sinistro, a, sottoalbero destro: ricorsione strutturale
+dimensione :: Albero a -> Integer
+dimensione Foglia      = 0
+dimensione (Nodo sx _ dx) = 1 + dimensione sx + dimensione dx
+--caso base sul costruttore non ricorsivo (Foglia), passo ricorsivo su (Nodo), con le chiamate
+--sui sottoalberi sx e dx. Induzione strutturale tradotta in codice
+--Anche la lista non ha nulla di speciale, semplicemente un tipo algebrico ricorsivo
+data Lista a = Vuota | Cons a (Lista a)
+--Vuota è [] e Cons è l'operatore :.
+perimetro :: Forma -> Double
+perimetro (Cerchio r)  =2*pi*r
+perimetro (Rettangolo b h) = (b+h)*2
