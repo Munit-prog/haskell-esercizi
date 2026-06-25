@@ -101,7 +101,36 @@ dimensione (Nodo sx _ dx) = 1 + dimensione sx + dimensione dx
 --sui sottoalberi sx e dx. Induzione strutturale tradotta in codice
 --Anche la lista non ha nulla di speciale, semplicemente un tipo algebrico ricorsivo
 data Lista a = Vuota | Cons a (Lista a)
---Vuota è [] e Cons è l'operatore :.
+--Vuota è [] e Cons è l'operatore :
+--perimetro (come area)
 perimetro :: Forma -> Double
 perimetro (Cerchio r)  =2*pi*r
 perimetro (Rettangolo b h) = (b+h)*2
+--funzione semaforo, cosa fa? Con data definiamo i colori, con prossimo la funzione
+data Semaforo = Rosso | Giallo | Verde
+  deriving Show
+prossimo :: Semaforo -> Semaforo
+prossimo Rosso = Verde
+prossimo Verde = Giallo
+prossimo Giallo = Rosso
+--funzione che somma i valori di tutti i Nodi di un albero
+sommaAlbero :: Albero Integer -> Integer
+sommaAlbero Foglia = 0
+sommaAlbero (Nodo sx x dx)= x + sommaAlbero sx + sommaAlbero dx
+--classi di tipo è un insieme di tipi che condividono un'interfaccia comune (interfaccia
+--o meglio nozione algebrica di struttura dotata di certe operazioni)
+
+-- => ciò che precede questo, è un vincolo
+massimoLista :: Ord a => [a] -> a
+massimoLista = foldr1 max
+--"per ogni tipo a che appartiene alla classe Ord, questa funzione va da [a] ad a"
+-- vincolo Ord a è ciò che autorizza l'uso di max, perchè max è un'operazione fornita proprio sulla
+--classe Ord, senza vincolo il compilatore rifiuterebbe il programma
+
+--4 Classi:
+--Eq (uguaglianza, con == e /=)
+--Ord (ordinamento, con compare, <, max, min)
+--Show (conversione in stringa, con Show)
+--Num (operazioni aritmetiche)
+
+
