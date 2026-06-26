@@ -186,3 +186,25 @@ naturali = 0 : map (+1) naturali
 
 fibonacci :: [Integer]
 fibonacci = 0 : 1 : zipWith (+) fibonacci (tail fibonacci)
+--qua converge perchè ogni elemento viene prodotto solo quando richiesto
+
+--foldr f z costituisce f x1 (f x2 (..)). Se f è pigra nel secondo argomento 
+--foldr può lavorare ancge su liste infinite e terminare
+--foldl deve consumare tutta la lista
+--space leak quando crea un thunk che consuma memoria
+--seq aiuta a forzare l'accumulatore
+seq :: a -> b -> b
+--seq x y forza x alla WHNF e poi restituisce y. 
+--foldl' per accumulazioni su liste lunghe
+--foldr giusto per operatore pigro o lista infinita
+--undefined (bottom) abita una struttura senza farla divergere
+
+--definire le potenze di due
+potenzeDiDue :: [Integer]
+potenzeDiDue=iterate (*2) 1
+--quadratiNaturali con come map
+naturali :: [Integer]
+naturali = 0 : map (+1) naturali
+
+quadratiNaturali :: [Integer]
+quadratiNaturali = map (^2) naturali
