@@ -208,3 +208,102 @@ naturali = 0 : map (+1) naturali
 
 quadratiNaturali :: [Integer]
 quadratiNaturali = map (^2) naturali
+
+
+--Maybe a è una valore che potrebbe mancare
+--[a] è molti valori
+--IO a è un valore prodotto da un effetto
+--classi che non astraggono su tipi ma su costruttori
+
+--Functor generalizza il map a qualunque contesto
+class Functor f where
+ fmap :: (a -> b) -> f a -> f b
+--fmap applica una funzione dentro il contesto, lasciandone intatta la struttura
+--per le lista fmap è letteralmente map e puoi rendere Functor anche il tuo
+--Albero applicando la funzione a ogni valore
+instance Functor Albero where
+ fmap _ Foglia    = Foglia
+ fmap g (Nodo sx x dx) = Nodo (fmap g sx) (g x) (fmap g dx)
+
+--fmap limite: applichi una funzione a due argomenti dentro un contesto
+--ottieni una funzione ancora racchiusa
+--per applicarla a un secondo Maybe serve un nuovo operatore:
+class Functor f => Applicative f where
+  pure :: a -> f a
+ (<*>) :: f (a->b) -> f a -> f b
+
+--pure inietta un valore nel contesto (pure 5 :: Maybe Int è Just 5)
+--<*> applica una funzione racchiusa a un argomento racchiuso
+
+--classe Monad fornisce l'operatore che concatena e "appiatisce":
+class Applicative m => Monad m where
+ (>>=) :: m a -> (a -> m b) -> m b
+-->>= si pronuncia bind. Prende un valore in un contesto, ne estra e il contenuto
+--lo passa a una funzione che produce un nuovo contesto. Con Maybe, gestisce
+--automaticamente il fallimento lungo una catena di calcoli
+divisioneSicura :: Double -> Double -> Maybe Double
+divisioneSicura _ 0 = Nothing
+divisioneSicura x y = Just (x/y)
+
+calcolo :: Maybe Double
+calcolo = divisioneSicura 100 5 >>= \r ->
+          divisioneSicura r 0   >>= \s ->
+          pure (s + 1)
+
+--calcolo vale Nothing: seconda divisione fallisce, e >>= interrompe la catena
+--senza che tu scriva un solo if. Poichè queste catene diventano illeggibili
+--Haskell offre notazione do, puro zucchero sintattico per >>=
+calcolo :: Maybe Double
+calcolo = do
+  r <- divisioneSicura 100 5
+  s <- divisioneSicura r 2
+  pure (s + 1)
+--ogni x<-m è un bind: estrae il contenuto di m e lo lega a x per le righe
+--successiva. Le tre leggi monadiche (identità a sinistra, a destra, associativa)
+--garantiscono che questo concatanamento si comporti in modo prevedibile
+
+--IO a non è un effetto: è la descrizione di un calcolo che, quando eseguito
+--dal runtime, produrrà un a . getLine :: IO String è un valore puro come ogni
+--altro; è la composizione di queste descrizioni - tramite >>=, cioè tramite do
+--a costruire il programma, che solo main consegna al runtime per l'esecuzione
+main :: IO ()
+main = do
+ putStrLn "Come ti chiami?"
+ nome <- getLine
+ putStrLn ("Ciao, " ++ nome)
+--IO è semplicemente un'altra monade: la stessa struttura di Maybe, applicata alla 
+--sequenzializzazione degli effetti invece che alla propagazione del fallimento
+
+--sommaDue con la monade Maybe
+--lookup cerca una chiave in una lista e restituisce un Maybe
+lookup :: Eq k => k -> [(k, v)] -> Maybe v
+
+sommaDue :: Eq k => k -> k -> [(k, Integer)] -> Maybe Integer
+sommaDue k1 k2 assoc = do
+ v1 <- lookup k1 assoc
+ v2 <- lookup k2 assoc
+ pure (v1 + v2)
+
+--leggiamo che succede con il do:
+--v1: esegue prima ricerca, se restituisce Just n, viene legato a v1
+--Nothing si interrompe e intero do vale Nothing
+--v2: stessa cosa
+--pure: somma le due ricerche avvenute con successo
+--si può riscrivere cosi:
+sommaDue k1 k2 assoc =
+ lookup k1 assoc >>= \v1 ->
+ lookup k2 assoc >>= \v2 ->
+ pure (v1 + v2)
+
+--dalla catena >>= alla notazione do, riscrivere:
+Just 3 >>= \x -> Just (x + 1) >>= \y -> Just (y*2)
+--ogni m>>=\nome -> diventa una riga nome <-m:
+do
+ x <- Just 3
+ y <- Just (x + 1)
+ Just (y * 2)
+--Passo passo:
+--x: estra il contenuto di Just 3, quindi x=3
+--y, calcola Just (3+1), Just 4, estra y=4
+--Just 8
+
