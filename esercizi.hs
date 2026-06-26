@@ -307,3 +307,48 @@ do
 --y, calcola Just (3+1), Just 4, estra y=4
 --Just 8
 
+--matrice una lista di righe, dove ogni riga è a sua volta una lista
+type Matrice a = [[a]]
+--matrice 2 x 3
+m :: Matrice Int
+m = [ [1, 2, 3],
+      [4, 5, 6]]
+--il numero di righe è la lunghezza della lista esterna; numero di colonne è la
+--lunghezza di una riga
+righe :: [[a]] -> Int
+righe = length
+
+colonne :: [[a]] -> Int
+colonne []	 =0
+colonne (r : _)  = length rù
+
+--zipWith, combina due liste elemento per elemento applicando una funzione
+zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+
+--somma tra matrici
+sommaMatrici :: Num a => [[a]] -> [[a]]
+sommaMatrici = zipWith (zipWith (+))
+
+--si legge: zipWith esterno accoppia le righe corrispondenti delle due matrici
+--quello interno accoppia gli elementi corrispondenti di ciascuna coppia di righe
+--prodotto per uno scalare
+scala :: Num a => a -> [[a]] -> [[a]]
+scala k = map (map (* k))
+
+--trasposta scambia righe e colonne
+trasponi :: [[a]] -> [[a]]
+trasponi []	  = []
+trasponi ([] : _) = []
+trasponi righe    = map head righe : trasponi (map tail righe)
+
+--list comprehension, per costruire liste
+--sintassi [espressione | generatore, condizione], x<-lista scorre gli elementi
+--le condizioni li filtrano. è map e filter in una sola riga
+--(i,j) del prodtto è prodotto scalare riga i prima matrice
+--con la colonna j della seconda
+prodotto :: Num a => [[a]] -> [[a]] -> [[a]]
+prodotto a b = [[sum (zipWith (*) riga colonna) | colonna <- trasponi b]
+             | riga <- a]
+
+--matrice identita
+ident
