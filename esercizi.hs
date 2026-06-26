@@ -133,4 +133,56 @@ massimoLista = foldr1 max
 --Show (conversione in stringa, con Show)
 --Num (operazioni aritmetiche)
 
+instance Eq Semaforo where
+  Rosso == Rosso = True
+  Giallo == Giallo = True
+  Verde == Verde = True
+_       == _     = False
+--definito solo == ma anche /= funziona, perchè la classe Eq fornisce una 
+--definizione di default
+data Semaforo = Rosso | Giallo | Verde
+  deriving (Eq, Ord, Show)
+--Eq confronta strutturalmente; Show produce rappresentazione testuale
+--Ord usa l'ordine di dichiarazione dei costruttori
 
+--definire le proprie classi
+class Misurabile a where
+  dimensioneDi :: a-> Integer
+  vuoto        :: a-> Bool
+  vuoto x = dimensioniDi x == 0
+
+--rendiamo Albero un'istanza
+instance Misurabile (Albero a) where
+  dimensioneDi Foglia       = 0
+  dimensioneDi (Nodo sx _ dx) = 1 + dimensioneDi sx + dimensioneDi dx
+
+--rendere forma instanza di Eq
+instance Eq Forma where
+Cerchio r==Cerchio r1 = r==r1
+Rettangolo b h == Rettangolo b1 h1 = b==b1 && h==h1
+ _         == _          = False
+--classe descrivibile
+class Descrivibile a where
+descrivi :: a -> String --istanze di Forma e Semaforo
+instance Descrivibile Forma where
+descrivi (Cerchio _)= "Sono un cerchio"
+descrivi (Rettangolo _) = "Sono un rettangolo"
+
+instance Descrivibile Semaforo where
+descrivi Rosso = "Traffico fermo"
+descrivi Giallo = "Auto inizia a fermarsi"
+descrivi Verde = "Traffico va avanti"
+
+--tutteUguali se tutti elementi lista sono uguali
+tutteUguali :: Eq a => [a] -> Bool
+tutteUguali []= True
+tutteUguali [_] = True
+tutteUguali (x:xs) = x == head xs && tutteUguali xs
+
+--haskell le liste infinite le ferma prima senza calcolare tutto quello dopo
+--definire valori in termini di sè stessi
+naturali :: [Integer]
+naturali = 0 : map (+1) naturali
+
+fibonacci :: [Integer]
+fibonacci = 0 : 1 : zipWith (+) fibonacci (tail fibonacci)
