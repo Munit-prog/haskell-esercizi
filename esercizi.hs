@@ -351,4 +351,16 @@ prodotto a b = [[sum (zipWith (*) riga colonna) | colonna <- trasponi b]
              | riga <- a]
 
 --matrice identita
-ident
+identita :: Int -> [[Integer]] 
+identita n = [[if i == j then 1 else 0 | j <- [1..n] ] | i <- [1..n]]
+
+--[...| i<- [1..n]] genera le righe: i scorre da 1 a n, e per ogni valore di i
+--produce una riga. i è l'indice della riga
+
+--[if i==j then 1 else 0 | j<- [1..n]] genera gli elementi di una singola riga:
+--j scorre da 1 a n ed è l'indice di colonna. se i==j mettiamo 1, altrimenti 0
+
+--traccia: somma elementi diagonali principale
+traccia :: Num a => [[a]] -> a
+traccia m = sum (zipWith (||) m [0..])
+
